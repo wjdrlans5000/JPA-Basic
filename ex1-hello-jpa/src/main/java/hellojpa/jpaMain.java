@@ -55,6 +55,9 @@ public class jpaMain {
             Member member = em.find(Member.class, 150L);
             member.setName("ZZZZ");
 
+            em.clear();
+//            em.detach(member);
+
             System.out.println("=======================");
             // commit 시점에 데이터베이스에 쿼리가 날라감
             tx.commit();
