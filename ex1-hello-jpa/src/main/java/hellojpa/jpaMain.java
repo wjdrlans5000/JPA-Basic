@@ -55,7 +55,7 @@ public class jpaMain {
             Member member = em.find(Member.class, 150L);
             member.setName("ZZZZ");
 
-            em.clear();
+//            em.clear();
 //            em.detach(member);
 
             System.out.println("=======================");

@@ -229,8 +229,31 @@ CREATE TABLE MEMBER (
         - 기본 생성자 필수
         - final 클래스, enum,interface,inner 클래스 사용X
         - 저장할 필드에 final 사용X
-    -@Table
+    - @Table
         - name : 매핑할 테이블 이름
         - catalog : 데이터베이스 catalog 매핑
         - schema : 데이터베이스 schema 매핑
         - uniqueConstraints : DDL 생성 시에 유니크 제약조건 생성
+    
+- 데이터베이스 스키마 자동 생성
+    - 애플리케이션 실행 시점에 db테이블을 생성해주는 기능 제공( 운영에서 사용 x )
+    - 테이블 중심 -> 객체중심
+    - 데이터베이스 방언을 활용해서 데이터베이스에 맞는 적절한 ddl 생성
+    - 이렇게 생성된 ddl은 개발 장비에서만 사용
+    - 생성된 ddl은 운영서버에서는 사용하지 않거나, 적절히 다듬은 후 사용
+    - create : 애플리케이션 실행시 존재하는 기존 테이블을 drop하고 다시 create 함 (drop + create)
+    - create-drop : create와 같으나 종료시점에 테이블 drop
+    - update : 변경부분만 반영(운영db사용x)
+    - validate : 엔티티와 테이블이 정상 매핑되었는지만 확인
+    - none : 사용하지 않음
+    ```xml
+      <property name="hibernate.hbm2ddl.auto" value="create" />
+    ```
+    - 운영장비에는 절대 create, create-drop, update 사용하면 안된다.
+    - 개발 초기단계는 create 또는 update
+    - 테스트서버는 update 또는 validate
+    - 스테이징과 운영서버는 validate 또는 none
+    - ddl 생성기능
+        - 제약조건 추가 
+            - @Column(name = "username", unique = true, length = 10)
+        - ddl 생성 기능은 ddl을 자동 생성할때만 사용되고 jpa의 실행 로직에는 영향을 주지 않는다.

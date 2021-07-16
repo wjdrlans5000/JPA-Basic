@@ -23,7 +23,7 @@ public class Member {
         this.name = name;
     }
 
-    //    @Column(name = "username")
+    @Column(name = "username", unique = true, length = 10)
     private String name;
 
     public Long getId() {
