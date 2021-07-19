@@ -257,3 +257,120 @@ CREATE TABLE MEMBER (
         - 제약조건 추가 
             - @Column(name = "username", unique = true, length = 10)
         - ddl 생성 기능은 ddl을 자동 생성할때만 사용되고 jpa의 실행 로직에는 영향을 주지 않는다.
+        
+- 필드와 컬럼 매핑
+```java
+    //컬럼맵핑
+    @Column(name = "name")
+    private String username;
+
+    private Integer age;
+
+    //enum 타입 매핑
+    @Enumerated(EnumType.STRING)
+    private RoleType roleType;
+
+    //날짜 타입 매핑
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdDate;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date lastModifiedDate;
+
+    //BLOB, CLOB 매핑
+    @Lob
+    private String description;
+
+    //특정 필드를 컬럼에 매핑하지 않음(매핑 무시)
+    @Transient
+    private  int temp;
+```
+
+
+- @Column
+
+| 속성 | 설명 | 기본값 |
+|---|---|---|
+| name | 필드와 매핑할 테이블의 컬럼 이름 | 객체의 필드 이름 | 
+| insertable, updatable | 등록, 변경 가능 여부 | TRUE | 
+| nullable(DDL)  | null 값의 허용 여부를 설정한다. false로 설정하면 DDL 생성 시에 not null 제약조건이 붙는다. |  | 
+| unique(DDL)  | @Table의 uniqueConstraints와 같지만 한 컬럼에 간단히 유니크 제약조건을 걸 때 사용한다.(제약조건 이름이 이상하게 주어지기때문에 운영 사용 X) | | 
+| columnDefinition(DDL)  | 데이터베이스 컬럼 정보를 직접 줄 수 있다. ex) varchar(100) default ‘EMPTY' | 필드의 자바 타입과방언 정보를 사용해 | 
+| length(DDL)  | 문자 길이 제약조건, String 타입에만 사용한다. | 255 | 
+| precision, scale(DDL)   | BigDecimal 타입에서 사용한다(BigInteger도 사용할 수 있다). precision은 소수점을 포함한 전체 자 릿수를, scale은 소수의 자릿수다. 참고로 double, float 타입에는 적용되지 않는다. 아주 큰 숫자나정 밀한 소수를 다루어야 할 때만 사용한다. | precision=19, scale=2  | |
+
+- @Enumerated
+    - ordinal 사용 비추천 무조건 String로 쓸것. enum 타입 추가시 순서가 변경되면 기준 코드가 달라짐.
+    - EX) RoleType.USER로 권한 셋팅시 RoleType 0으로 INSERT 하지만, USER 앞에 GUEST를 추가시 RoleType에 선언된 순서에 따라 GUEST가 0으로 INSERT 됨.
+    
+    ```java 
+            public enum RoleType {
+        //        GUEST,
+                USER,
+                ADMIN
+            }
+        
+            public class jpaMain {
+            
+                public static void main(String[] args) {
+                    // Persistence클래스가 EntityManagerFactory를 생성할때 unitName을 인자로 받는다.
+                    // Factory를 생성하는 순간 데이터베이스와의 연결도 완료된다.
+                    // 애플리케이션 로딩 시점에 딱 하나만 생성해야한다.
+                    EntityManagerFactory emf = Persistence.createEntityManagerFactory("hello");
+                    //자바 컬렉션이라고 생각하면됨 객체를 저장해주는 것
+                    EntityManager em = emf.createEntityManager();
+            
+                    EntityTransaction tx = em.getTransaction();
+                    tx.begin();
+            
+                    try {
+                        Member member = new Member();
+                        member.setId(1L);
+                        member.setUsername("A");
+                        member.setRoleType(RoleType.USER);
+            
+                        em.persist(member);
+            
+                        System.out.println("=======================");
+                        // commit 시점에 데이터베이스에 쿼리가 날라감
+                        tx.commit();
+            
+                    } catch (Exception e ){
+                        tx.rollback();
+                    } finally {
+                        em.close();
+                    }
+            
+                    emf.close();
+                }
+            }
+    ```
+  
+  
+| 속성 | 설명 | 기본값 |
+|---|---|---|
+| value | • EnumType.ORDINAL: enum 순서를 데이터베이스에 저장 <br /> • EnumType.STRING: enum 이름을 데이터베이스에 저장 | EnumType.ORDINAL | 
+ 
+- @Temporal
+    - 날짜 타입(java.util.Date, java.util.Calendar)을 매핑할 때 사용
+    - LocalDate, LocalDateTime을 사용할 때는 생략 가능(최신 하이버네이트 지원)
+    ```java 
+        //년월만, date 타입 으로 저장 
+        private LocalDate testLocalDate;
+    
+        //년월일 다 포함, timestamp 타입
+        private LocalDateTime testLocalDateTime;
+    ```
+    
+| 속성 | 설명 | 기본값 |
+|---|---|---|
+| value | • TemporalType.DATE: 날짜, 데이터베이스 date 타입과 매핑(예: 2013–10–11) <br /> • TemporalType.TIME: 시간, 데이터베이스 time 타입과 매핑(예: 11:11:11) <br /> • TemporalType.TIMESTAMP: 날짜와 시간, 데이터베이스 timestamp 타입과 매핑(예: 2013–10–11 11:11:11)  | EnumType.ORDINAL | 
+
+- @Lob
+    - 데이터베이스 BLOB, CLOB 타입과 매핑 
+    - @Lob에는 지정할 수 있는 속성이 없다.
+    - 매핑하는 필드 타입이 문자면 CLOB 매핑, 나머지는 BLOB 매핑
+    
+
+ 
+    
