@@ -20,43 +20,12 @@ public class jpaMain {
         tx.begin();
 
         try {
-            //비영속
-//            Member member = new Member();
-//            member.setId(1L);
-//            member.setName("HelloA");
-            //영속상태
-//            em.persist(member);
+            Member member = new Member();
+            member.setId(1L);
+            member.setUsername("A");
+            member.setRoleType(RoleType.USER);
 
-//            Member findmember = em.find(Member.class, 1L);
-//            Member findmember2 = em.find(Member.class, 1L);
-
-//            System.out.println("result = " + (findmember == findmember2));
-            //네임 수정 - 별도 저장안해도 업데이트 됨
-//            findmember.setName("HelloJPA");
-
-//            System.out.println( "findmember.id = " + findmember.getId());
-//            System.out.println( "findmember.name = " + findmember.getName());
-//            List<Member> resultList = em.createQuery("select m from Member as m", Member.class)
-//                    //paging 기능
-//                    .setFirstResult(5)
-//                    .setMaxResults(10)
-//                    .getResultList();
-//
-//            for (Member member: resultList) {
-//                System.out.println("member.name = " + member.getName());
-//            }
-
-
-//            Member member1 = new Member(150L, "A");
-//            Member member2 = new Member(160L, "B");
-//            em.persist(member1);
-//            em.persist(member2);
-
-            Member member = em.find(Member.class, 150L);
-            member.setName("ZZZZ");
-
-//            em.clear();
-//            em.detach(member);
+            em.persist(member);
 
             System.out.println("=======================");
             // commit 시점에 데이터베이스에 쿼리가 날라감
