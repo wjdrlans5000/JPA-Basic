@@ -396,54 +396,54 @@ CREATE TABLE MEMBER (
     - em.persist(member) 전에 call next value for member_seq > 시퀀스를 얻어옴
     - allocationSize 기본값은 50 시퀀스 1~51까지 미리 생성하고 메모리에서 꺼내어 사용
     - 데이터베이스 시퀀스값은 50씩 증가하지만 애플리케이션 내에서 동작할때는 메모리에서 꺼내어 사용하기때문에 1씩 증가
-    ```java
-        @Entity
-        @SequenceGenerator(name = "member_seq_generator", sequenceName = "member_seq", allocationSize = 50)
-        public class Member {
-        
-            //jpa에 pk를 알려주어야 함
-            @Id
-            @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "member_seq_generator")
-            private Long id;
-    ```
-  
-    ```java
-       Member member = new Member();
-       member.setUsername("A");
-       member.setRoleType(RoleType.USER);
-   
-       Member member2 = new Member();
-       member2.setUsername("B");
-       member2.setRoleType(RoleType.USER);
-   
-       Member member3= new Member();
-       member3.setUsername("C");
-       member3.setRoleType(RoleType.USER)
-       System.out.println("=======================");
-   
-       em.persist(member); //SEQUENCE 전략 1,51
-       em.persist(member2); //MEM
-       em.persist(member3); //MEM
-   
-       System.out.println("member1 : " + member.getId()); //1
-       System.out.println("member2 : " + member2.getId()); //2
-       System.out.println("member3 : " + member3.getId()); //3
-   
-       System.out.println("=======================");
-    ```
-  
-    ```java
-      @Entity 
-      @SequenceGenerator( 
-       name = “MEMBER_SEQ_GENERATOR", 
-       sequenceName = “MEMBER_SEQ", //매핑할 데이터베이스 시퀀스 이름
-       initialValue = 1, allocationSize = 1) 
-      public class Member { 
-       @Id 
-       @GeneratedValue(strategy = GenerationType.SEQUENCE, 
-       generator = "MEMBER_SEQ_GENERATOR") 
-       private Long id; 
-    ```
+```java
+    @Entity
+    @SequenceGenerator(name = "member_seq_generator", sequenceName = "member_seq", allocationSize = 50)
+    public class Member {
+    
+        //jpa에 pk를 알려주어야 함
+        @Id
+        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "member_seq_generator")
+        private Long id;
+```
+
+```java
+   Member member = new Member();
+   member.setUsername("A");
+   member.setRoleType(RoleType.USER);
+
+   Member member2 = new Member();
+   member2.setUsername("B");
+   member2.setRoleType(RoleType.USER);
+
+   Member member3= new Member();
+   member3.setUsername("C");
+   member3.setRoleType(RoleType.USER)
+   System.out.println("=======================");
+
+   em.persist(member); //SEQUENCE 전략 1,51
+   em.persist(member2); //MEM
+   em.persist(member3); //MEM
+
+   System.out.println("member1 : " + member.getId()); //1
+   System.out.println("member2 : " + member2.getId()); //2
+   System.out.println("member3 : " + member3.getId()); //3
+
+   System.out.println("=======================");
+```
+
+```java
+  @Entity 
+  @SequenceGenerator( 
+   name = "MEMBER_SEQ_GENERATOR", 
+   sequenceName = "MEMBER_SEQ", //매핑할 데이터베이스 시퀀스 이름
+   initialValue = 1, allocationSize = 1) 
+  public class Member { 
+   @Id 
+   @GeneratedValue(strategy = GenerationType.SEQUENCE, 
+   generator = "MEMBER_SEQ_GENERATOR") 
+   private Long id; 
+```
    - @SequenceGenerator - 속성
    
    | 속성 | 설명 | 기본값 |
