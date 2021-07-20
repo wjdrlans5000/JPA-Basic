@@ -21,11 +21,29 @@ public class jpaMain {
 
         try {
             Member member = new Member();
-            member.setId(1L);
+//            member.setId("id_a");
             member.setUsername("A");
             member.setRoleType(RoleType.USER);
 
-            em.persist(member);
+            Member member2 = new Member();
+//            member.setId("id_a");
+            member2.setUsername("B");
+            member2.setRoleType(RoleType.USER);
+
+            Member member3= new Member();
+//            member.setId("id_a");
+            member3.setUsername("C");
+            member3.setRoleType(RoleType.USER);
+            System.out.println("=======================");
+
+            //IDENTITY 전략의 경우 persist 시점에 insert 쿼리가 날라감. 이 시점에 id값을 알수 있음
+            em.persist(member); //SEQUENCE 전략 1,51
+            em.persist(member2); //MEM
+            em.persist(member3); //MEM
+
+            System.out.println("member1 : " + member.getId());
+            System.out.println("member2 : " + member2.getId());
+            System.out.println("member3 : " + member3.getId());
 
             System.out.println("=======================");
             // commit 시점에 데이터베이스에 쿼리가 날라감

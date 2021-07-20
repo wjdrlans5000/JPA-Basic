@@ -7,11 +7,18 @@ import java.util.Date;
 
 
 @Entity
+@SequenceGenerator(name = "member_seq_generator", sequenceName = "member_seq", allocationSize = 50)
+//@TableGenerator(
+//        name = "MEMBER_SEQ_GENERATOR",
+//        table = "MY_SEQUENCES",
+//        pkColumnValue = "MEMBER_SEQ", allocationSize = 1)
 //@Table(name="USER")
 public class Member {
 
     //jpa에 pk를 알려주어야 함
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "member_seq_generator")
+//    @GeneratedValue(strategy = GenerationType.TABLE, generator = "MEMBER_SEQ_GENERATOR")
     private Long id;
 
     @Column(name = "name")
