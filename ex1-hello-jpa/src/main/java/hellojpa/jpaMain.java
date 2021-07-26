@@ -20,7 +20,7 @@ public class jpaMain {
         tx.begin();
 
         try {
-            Member member = new Member();
+/*            Member member = new Member();
 //            member.setId("id_a");
             member.setUsername("A");
             member.setRoleType(RoleType.USER);
@@ -45,8 +45,38 @@ public class jpaMain {
             System.out.println("member2 : " + member2.getId());
             System.out.println("member3 : " + member3.getId());
 
-            System.out.println("=======================");
+            System.out.println("=======================");*/
             // commit 시점에 데이터베이스에 쿼리가 날라감
+
+            //연관관계 매핑 기초
+            Team team = new Team();
+            team.setName("TeamA");
+            em.persist(team);
+
+
+            Member member = new Member();
+            member.setUsername("member1");
+            //jpa가 알아서 팀에서 pk값을 꺼내서 외래키로 조인
+            member.setTeam(team);
+            //객체지향스럽지 못한 방식
+//            member.setTeamId(team.getId());
+            em.persist(member);
+
+            //테스트시 영속성 컨텍스트(1차캐시)를 초기화하여 select 쿼리를 보고 싶을경우 사용
+//            em.flush();
+//            em.clear();
+
+            Member findMember = em.find(Member.class, member.getId());
+
+            //멤버에서 바로 팀을 꺼내서 사용할수 있음
+            Team findTeam = findMember.getTeam();
+            System.out.println("findTeam = " + findTeam.getName());
+
+            //객체지향스럽지 못한 방식
+//            Long findTeamId = findMember.getTeamId();
+//            Team findTeam = em.find(Team.class,findTeamId);
+
+
             tx.commit();
 
         } catch (Exception e ){

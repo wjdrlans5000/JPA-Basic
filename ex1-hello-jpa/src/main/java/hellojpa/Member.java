@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 
-
+/*
 @Entity
 @SequenceGenerator(name = "member_seq_generator", sequenceName = "member_seq", allocationSize = 50)
 //@TableGenerator(
@@ -119,7 +119,57 @@ public class Member {
         this.temp = temp;
     }
 
+}*/
 
+@Entity
+public class Member {
+    @Id
+    @GeneratedValue
+    @Column(name = "MEMBER_ID")
+    private Long id;
 
+    @Column(name = "USERNAME")
+    private String username;
 
+//    @Column(name = "TEAM_ID")
+//    private Long teamId;
+
+    //팀이 1 멤버가 N
+    @ManyToOne
+    @JoinColumn(name = "TEAM_ID")
+    private Team team;
+
+    public Team getTeam() {
+        return team;
+    }
+
+    public void setTeam(Team team) {
+        this.team = team;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+//    public Long getTeamId() {
+//        return teamId;
+//    }
+//
+//    public void setTeamId(Long teamId) {
+//        this.teamId = teamId;
+//    }
 }
+
+
