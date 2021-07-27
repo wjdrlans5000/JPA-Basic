@@ -147,6 +147,14 @@ public class Member {
         this.team = team;
     }
 
+    //로직이들어갈 경우엔 setter를 사용하지 않고 이름변경 추천
+//    public void changeTeam(Team team) {
+//        this.team = team;
+//        //연관관계 편의 메서드 작성
+//        //멤버의 팀을 셋팅하는 시점에 team에도 멤버를 셋팅
+//        team.getMembers().add(this);
+//    }
+
     public Long getId() {
         return id;
     }
@@ -170,6 +178,16 @@ public class Member {
 //    public void setTeamId(Long teamId) {
 //        this.teamId = teamId;
 //    }
+
+    // 양쪽으로 team, members toString 무한 호출해버림
+    @Override
+    public String toString() {
+        return "Member{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", team=" + team +
+                '}';
+    }
 }
 
 

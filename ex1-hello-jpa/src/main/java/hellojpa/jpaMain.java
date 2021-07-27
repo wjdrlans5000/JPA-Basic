@@ -51,26 +51,45 @@ public class jpaMain {
             //연관관계 매핑 기초
             Team team = new Team();
             team.setName("TeamA");
-            em.persist(team);
 
+            em.persist(team);
 
             Member member = new Member();
             member.setUsername("member1");
-            //jpa가 알아서 팀에서 pk값을 꺼내서 외래키로 조인
-            member.setTeam(team);
+            //연관관계 편의 메서드가 양쪽다 있으면 문제가 될수 있기때문에 하나는 지움
+//            member.changeTeam(team); //**
             //객체지향스럽지 못한 방식
 //            member.setTeamId(team.getId());
             em.persist(member);
 
+            //연관관계 편의 메서드
+            team.addMember(member);
+
+            //연관관계의 주인이 아니기때문에 조회만 가능
+            //객체지향적으로 생각했을때 양쪽 모두 값을 셋팅해주는 것이 맞음
+            //** 연관관계 편의 메소드 생성
+//            team.getMembers().add(member); //**
+
             //테스트시 영속성 컨텍스트(1차캐시)를 초기화하여 select 쿼리를 보고 싶을경우 사용
+            //이후 db에서 다시 조회
 //            em.flush();
 //            em.clear();
 
-            Member findMember = em.find(Member.class, member.getId());
+            //flush, clear를 하지 않으면 team에 member가 없음
+            //영속성 컨텍스트에 em.persist(team); 시점의 객체가 1차 캐시로 로딩되어있기 때문에 team에 member 컬렉션이 비어있음
+            Team findTeam = em.find(Team.class, team.getId()); // 1차 캐시
+            List<Member> members = findTeam.getMembers();
+
+//            Member findMember = em.find(Member.class, member.getId());
+//            List<Member> members = findMember.getTeam().getMembers();
+            for (Member m : members){
+                System.out.println("m = " + m.getUsername());
+            }
 
             //멤버에서 바로 팀을 꺼내서 사용할수 있음
-            Team findTeam = findMember.getTeam();
-            System.out.println("findTeam = " + findTeam.getName());
+//            Team findTeam = findMember.getTeam();
+            //양방향 참조 toSting시 무한루프 발생
+            System.out.println("findTeam = " + findTeam);
 
             //객체지향스럽지 못한 방식
 //            Long findTeamId = findMember.getTeamId();
