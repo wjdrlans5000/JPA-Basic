@@ -2,6 +2,7 @@ package jpabook.jpashop;
 
 import jpabook.jpashop.domain.Member;
 import jpabook.jpashop.domain.Order;
+import jpabook.jpashop.domain.OrderItem;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -21,11 +22,22 @@ public class JpaMain {
         tx.begin();
 
         try {
-            Order order = em.find(Order.class, 1L);
-            Long memberId = order.getMemberId();
+//            Order order = em.find(Order.class, 1L);
+//            Long memberId = order.getMemberId();
+//
+//            Member member = em.find(Member.class,memberId);
+//            Member findMember = order.getMember();
 
-            Member member = em.find(Member.class,memberId);
-            Member findMember = order.getMember();
+            //꼭 양방향 연관관계가 아니어도 애플리케이션 개발하는데 큰 문제는 없음
+            //최대한 단방향으로 하는것을 추천
+            Order order = new Order();
+            em.persist(order);
+            //양방향 연관관계를 만드는 이유는 개발상의 편의나 기타 다른 필요한 이유가 있을때 사용
+//            order.addOrderItem(new OrderItem());
+
+            OrderItem orderItem = new OrderItem();
+            orderItem.setOrder(order);
+            em.persist(orderItem);
 
 
             System.out.println("=======================");
