@@ -551,5 +551,47 @@ CREATE TABLE MEMBER (
         - JPQL에서 역방향으로 탐색할 일이 많음.
         - 단방향 매핑을 잘하고 양방향은 필요할때 추가해도됨(테이블에 영향을 주지 않음)
         
- 
-    
+- 연관관계 매핑시 고려사항 3가지
+    - 다중성(다대일,일대다,일대일,다대다)
+        - 데이터베이스 관점에서의 다중성을 고민
+        - 다대다는 사실 실무에서 쓰면 안됨
+    - 단방향,양방향
+        - 테이블
+            - 외래키 하나로 양쪽 조인가능(방향이라는 개념이 없음)
+        - 객체
+            - 참조용 필드가 있는 쪽으로만 참조가능
+            - 한쪽만 참조하면 단방향
+            - 양쪽이 서로 참조하면 양방향(사실 객체입장에서보면 양방향이 아니라 단방향이 두개가 있는것)
+    - 연관관계의 주인
+        - 외래키를 관리하는 참조
+
+- 다대일[N:1]
+    - 가장 많이 사용하는 연관관계
+    - 다대일의 반대는 일대다
+- 일대다[1:N]
+    - 권장하는 방식은 아님(운영환경에서 관리가 어려움)
+    - 일대다 단방향은 일대다(1:N)에서 일(1)이 연관관계의 주인
+    - 테이블 일대다 관계는 항상 다(N) 쪽에 외래 키가 있음
+    - 객체와 테이블의 차이 때문에 반대편 테이블의 외래 키를 관리하는 특이한 구조
+    - @JoinColumn을 꼭 사용해야 함. 그렇지 않으면 조인 테이블방식을 사용함(중간에 테이블을 하나 추가함)
+    - 연관관계 관리를 위해 외래키가 있는 다른테이블을 추가로 UPDATE SQL 실행
+    ```java
+      @Entity
+      public class Team {
+        ......
+        @OneToMany
+        @JoinColumn(name = "TEAM_ID")
+        private List<Member> members = new ArrayList<>();
+    ```
+    - 일대다 양방향
+        - 이런 매핑은 공식적으로 존재X
+        - @JoinColumn(insertable=false, updatable=false)
+        - 읽기 전용 필드를 사용해서 양방향 처럼 사용하는 방법
+        ```java
+          @Entity
+          public class Member {
+            ......
+            @ManyToOne
+            @JoinColumn(name="TEAM_ID", insertable=false, updatable=false)
+            private Team team;
+        ```
