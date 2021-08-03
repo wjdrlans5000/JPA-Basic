@@ -147,6 +147,10 @@ public class Member {
         this.team = team;
     }
 
+    @OneToOne
+    @JoinColumn(name = "LOCKER_ID")
+    private Locker locker;
+
     //로직이들어갈 경우엔 setter를 사용하지 않고 이름변경 추천
 //    public void changeTeam(Team team) {
 //        this.team = team;

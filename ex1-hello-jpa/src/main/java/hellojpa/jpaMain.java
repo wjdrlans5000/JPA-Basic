@@ -89,7 +89,7 @@ public class jpaMain {
             //멤버에서 바로 팀을 꺼내서 사용할수 있음
 //            Team findTeam = findMember.getTeam();
             //양방향 참조 toSting시 무한루프 발생
-            System.out.println("findTeam = " + findTeam);
+//            System.out.println("findTeam = " + findTeam);
 
             //객체지향스럽지 못한 방식
 //            Long findTeamId = findMember.getTeamId();
