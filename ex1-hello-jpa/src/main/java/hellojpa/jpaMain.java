@@ -1,5 +1,7 @@
 package hellojpa;
 
+import org.hibernate.Hibernate;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -96,34 +98,107 @@ public class jpaMain {
 //            Long findTeamId = findMember.getTeamId();
 //            Team findTeam = em.find(Team.class,findTeamId);
 
-            // 상속관계 매핑 > 조인전략
-            Movie movie = new Movie();
-            movie.setDirector("aaaa");
-            movie.setActor("bbbb");
-            movie.setName("바람과함께사라지다");
-            movie.setPrice(10000);
+//            // 상속관계 매핑 > 조인전략
+//            Movie movie = new Movie();
+//            movie.setDirector("aaaa");
+//            movie.setActor("bbbb");
+//            movie.setName("바람과함께사라지다");
+//            movie.setPrice(10000);
+//
+//            em.persist(movie);
+//
+//            // MappedSuperclass
+//            Member member = new Member();
+//            member.setUsername("user1");
+//            member.setCreatedBy("kim");
+//            member.setCreatedDate(LocalDateTime.now());
+//
+//            em.persist(member);
+//
+//            //1차캐시 제거
+//            em.flush();
+//            em.clear();
+//
+//            Movie findMove = em.find(Movie.class, movie.getId());
+//            System.out.println("findMove = " + findMove);
 
-            em.persist(movie);
-
-            // MappedSuperclass
+            //프록시
             Member member = new Member();
-            member.setUsername("user1");
-            member.setCreatedBy("kim");
-            member.setCreatedDate(LocalDateTime.now());
+            member.setUsername("hello");
 
             em.persist(member);
 
-            //1차캐시 제거
+            Member member2 = new Member();
+            member.setUsername("hello2");
+
+            em.persist(member2);
+
+
             em.flush();
             em.clear();
 
-            Movie findMove = em.find(Movie.class, movie.getId());
-            System.out.println("findMove = " + findMove);
+            //진짜 엔티티 객체를 줌
+//            Member findMember = em.find(Member.class, member.getId());
+            //진짜로 객체를 주는것이 아니라 가짜 엔티티 객체를 줌 (id값만 들고있는 껍데기만 반환)
+            //getUsername()을 호출하는 시점에 영속성 컨텍스트를 통해서 초기화 요청을 하고 jpa가 db에서 조회하여 실제 Entity 생성
+            //생성된 프록시객체(findMember)의 target.getName()으로 실제 객체의 메소드 호출
+//            Member findMember = em.getReference(Member.class, member.getId());
+//            System.out.println("findMember : " + findMember.getClass()); //class hellojpa.Member$HibernateProxy$N7MF4UtP
+//            System.out.println("findMemberId : " + findMember.getId());
+//            System.out.println("findMemberUsername : " + findMember.getUsername());
+//            System.out.println("findMemberUsername : " + findMember.getUsername());
+
+//            Member m1 = em.find(Member.class, member.getId());
+//            System.out.println("m1 : " + m1.getClass());
+//            Member m2 = em.getReference(Member.class, member2.getId());
+
+//            System.out.println("m1 == m2 : " + (m1.getClass() == m2.getClass()));
+//            System.out.println("m1 == m2 : " + (m1 instanceof Member));
+//            System.out.println("m1 == m2 : " + (m2 instanceof Member));
+
+            //영속성 컨텍스트에 찾는 엔티티가 이미 있는 경우 em.getReference()를 호출해도 실제 엔티티 반환
+//            Member reference = em.getReference(Member.class, member.getId());
+//            System.out.println("reference : " + reference.getClass());
+
+            //항상 true를 반환해주어야함
+            //m1을 만약 reference로 가져오더라도 같은 프록시를 가져옴 (항상 true되어야 하기 때문)
+//            System.out.println("a == a : " + (m1 == reference));
+
+//            Member refMember = em.getReference(Member.class, member.getId());
+//            System.out.println("refMember : " + refMember.getClass()); //Proxy 예상
+//
+//            Member findMember = em.find(Member.class, member.getId());
+//            System.out.println("findMember : " + findMember.getClass()); //Member 예상
+//
+//            //refMember, findMember 둘다 결과는 Proxy로 나옴
+//            //항상 true되어야 하기 때문
+//            System.out.println("refMember == findMember : " + (refMember == findMember));
+
+            //
+            //**준영속 상태일 때, 프록시를 초기화하면 문제 발생 (could not initialize proxy)**
+            //영속성 컨텍스트를 통해서 초기화 요청을 하기 때문
+            Member refMember = em.getReference(Member.class, member.getId());
+            System.out.println("refMember : " + refMember.getClass()); //Proxy 예상
+
+            //영속성 컨텍스트를 종료하거나 관리X, clear
+            em.detach(refMember);
+//            em.close();
+//            em.clear();
+
+            refMember.getUsername();
+            System.out.println("refMember : " + refMember.getUsername());
+//            프록시 인스턴스의 초기화 여부 확인
+            System.out.println("isLoaded : " + emf.getPersistenceUnitUtil().isLoaded(refMember));
+//            프록시 강제 초기화
+            Hibernate.initialize(refMember);
+
+            //
 
 
             tx.commit();
 
         } catch (Exception e ){
+            e.printStackTrace();
             tx.rollback();
         } finally {
             em.close();
