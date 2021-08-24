@@ -123,19 +123,19 @@ public class jpaMain {
 //            System.out.println("findMove = " + findMove);
 
             //프록시
-            Member member = new Member();
-            member.setUsername("hello");
-
-            em.persist(member);
-
-            Member member2 = new Member();
-            member.setUsername("hello2");
-
-            em.persist(member2);
-
-
-            em.flush();
-            em.clear();
+//            Member member = new Member();
+//            member.setUsername("hello");
+//
+//            em.persist(member);
+//
+//            Member member2 = new Member();
+//            member.setUsername("hello2");
+//
+//            em.persist(member2);
+//
+//
+//            em.flush();
+//            em.clear();
 
             //진짜 엔티티 객체를 줌
 //            Member findMember = em.find(Member.class, member.getId());
@@ -177,23 +177,50 @@ public class jpaMain {
             //
             //**준영속 상태일 때, 프록시를 초기화하면 문제 발생 (could not initialize proxy)**
             //영속성 컨텍스트를 통해서 초기화 요청을 하기 때문
-            Member refMember = em.getReference(Member.class, member.getId());
-            System.out.println("refMember : " + refMember.getClass()); //Proxy 예상
-
-            //영속성 컨텍스트를 종료하거나 관리X, clear
-            em.detach(refMember);
-//            em.close();
-//            em.clear();
-
-            refMember.getUsername();
-            System.out.println("refMember : " + refMember.getUsername());
-//            프록시 인스턴스의 초기화 여부 확인
-            System.out.println("isLoaded : " + emf.getPersistenceUnitUtil().isLoaded(refMember));
-//            프록시 강제 초기화
-            Hibernate.initialize(refMember);
+//            Member refMember = em.getReference(Member.class, member.getId());
+//            System.out.println("refMember : " + refMember.getClass()); //Proxy 예상
+//
+//            //영속성 컨텍스트를 종료하거나 관리X, clear
+//            em.detach(refMember);
+////            em.close();
+////            em.clear();
+//
+//            refMember.getUsername();
+//            System.out.println("refMember : " + refMember.getUsername());
+////            프록시 인스턴스의 초기화 여부 확인
+//            System.out.println("isLoaded : " + emf.getPersistenceUnitUtil().isLoaded(refMember));
+////            프록시 강제 초기화
+//            Hibernate.initialize(refMember);
 
             //
+            // 지연로딩, 즉시로딩 테스트
+            Team team = new Team();
+            team.setName("teamA");
+            em.persist(team);
 
+            Member member1 = new Member();
+            member1.setUsername("member1");
+            member1.setTeam(team);
+            em.persist(member1);
+
+
+
+            em.flush();
+            em.clear();
+
+            //sql로 번역이 됨 즉시로딩일 경우  select * from member , select * from team where team_id = '' 두개의 쿼리가 나감
+            //즉시로딩이더라도 join fetch 사용하여 주면 실행하는 쿼리에 따라서 조인해서 한방쿼리로 가져옴
+            List<Member> members = em.createQuery("select m from Member m join fetch m.team", Member.class)
+                    .getResultList();
+
+
+//            Member m = em.find(Member.class, member1.getId());
+//            // 팀을 프록시 객체로 가져옴
+//            System.out.println("m = " + m.getTeam().getClass());
+//            System.out.println("=============");
+//            // 실제 팀을 사용하는 시점에 초기화
+//            System.out.println("teamName = "+m.getTeam().getName());
+//            System.out.println("=============");
 
             tx.commit();
 

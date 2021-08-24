@@ -766,3 +766,49 @@ CREATE TABLE MEMBER (
                 - 프록시 강제 초기화 : org.hibernate.Hibernate.initialize(entity);
                 - JPA 표준은 강제 초기화 없음 : 강제 호출: member.getName()
             - 실무에서 getReference() 잘 안씀 
+    - 지연로딩
+        - 지연 로딩 LAZY을 사용해서 프록시로 조회
+        ```java
+              @ManyToOne(fetch = FetchType.LAZY)
+              @JoinColumn(name = "TEAM_ID")
+              private Team team;
+        ```
+        ```java
+              // 지연로딩 사용
+              Team team = new Team();
+              team.setName("teamA");
+              em.persist(team);
+              
+              Member member1 = new Member();
+              member1.setUsername("member1");
+              member1.setTeam(team);
+              em.persist(member1);
+              
+              em.flush();
+              em.clear();
+              
+              Member m = em.find(Member.class, member1.getId());
+              // 팀을 프록시 객체로 가져옴
+              System.out.println("m = " + m.getTeam().getClass());
+              System.out.println("=============");
+              // 실제 팀을 사용하는 시점에 초기화
+              m.getTeam().getName();
+              System.out.println("=============");
+        ```
+    - 즉시로딩
+        - 즉시 로딩 EAGER를 사용해서 함께 조회
+        ```java
+            @ManyToOne(fetch = FetchType.EAGER)
+            @JoinColumn(name = "TEAM_ID")
+            private Team team;
+        ```
+        - 즉시 로딩(EAGER), Member조회시 항상 Team도 조회
+        - JPA 구현체는 가능하면 조인을 사용해서 SQL 한번에 함께 조회(멤버를 조회할때 팀까지 조인해서 같이 가져온다.)
+    - 프록시와 즉시로딩 주의
+        - 가급적 지연 로딩만 사용(특히 실무에서)
+        - 즉시 로딩을 적용하면 예상하지 못한 SQL이 발생(조인)
+        - 즉시 로딩은 JPQL에서 N+1 문제를 일으킨다.
+            - jpql이 sql로 번역이 되기때문에 즉시로딩의 경우 두개의 쿼리가 나가게됨
+        - @ManyToOne, @OneToOne은 기본이 즉시 로딩 -> LAZY로 설정
+        - @OneToMany, @ManyToMany는 기본이 지연 로딩
+        

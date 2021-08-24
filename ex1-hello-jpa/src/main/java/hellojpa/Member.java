@@ -137,7 +137,10 @@ public class Member extends BaseEntity {
 //    private Long teamId;
 
     //팀이 1 멤버가 N
-    @ManyToOne
+    //지연 로딩 LAZY을 사용해서 프록시로 조회
+//    @ManyToOne(fetch = FetchType.LAZY)
+    //즉시 로딩 EAGER를 사용해서 함께 조회
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "TEAM_ID")
     private Team team;
 
