@@ -222,6 +222,27 @@ public class jpaMain {
 //            System.out.println("teamName = "+m.getTeam().getName());
 //            System.out.println("=============");
 
+            //영속성 전이 : CASCADE
+            Child child1 = new Child();
+            Child child2 = new Child();
+
+            Parent parent = new Parent();
+            parent.addChild(child1);
+            parent.addChild(child2);
+
+            //원래는 persist를 아래처럼 3번해줘야함
+            //@OneToMany(mappedBy = "parent",cascade=CascadeType.ALL) 캐스케이드 옵션을 주면 parent만 persist해도 child도 persist 됨
+            em.persist(parent);
+//            em.persist(child1);
+//            em.persist(child2);
+
+            em.flush();
+            em.clear();
+
+            //@OneToMany(mappedBy = "parent",cascade=CascadeType.ALL, orphanRemoval = true)
+            Parent findParent = em.find(Parent.class, parent.getId());
+            findParent.getChildList().remove(0);
+
             tx.commit();
 
         } catch (Exception e ){
