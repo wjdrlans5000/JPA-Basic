@@ -194,7 +194,7 @@ public class jpaMain {
 
             //
             // 지연로딩, 즉시로딩 테스트
-            Team team = new Team();
+/*            Team team = new Team();
             team.setName("teamA");
             em.persist(team);
 
@@ -241,8 +241,15 @@ public class jpaMain {
 
             //@OneToMany(mappedBy = "parent",cascade=CascadeType.ALL, orphanRemoval = true)
             Parent findParent = em.find(Parent.class, parent.getId());
-            findParent.getChildList().remove(0);
+            findParent.getChildList().remove(0);*/
 
+            //임베디드타입 사용
+            Member member = new Member();
+            member.setUsername("hello");
+            member.setAddress(new Address("city","street","11"));
+            member.setPeriod(new Period());
+
+            em.persist(member);
             tx.commit();
 
         } catch (Exception e ){

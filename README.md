@@ -867,3 +867,155 @@ CREATE TABLE MEMBER (
         - 임베디드 타입(embedded type, 복합 값 타입)
         - 컬렉션 값 타입(collection value type)
 
+    - 임베디드 타입
+        - 새로운 값 타입을 직접 정의할 수 있음
+        - JPA는 임베디드 타입(embedded type)이라 함
+        - 주로 기본 값 타입을 모아서 만들어서 복합 값 타입이라고도 함
+        - int, String과 같은 값 타입
+        - 장점
+            - 재사용성, 응집도가 높음
+            - Period.isWork()처럼 해당 값 타입만 사용하는 의미 있는 메소드를 만들수 있음.
+            - 임베디드 타입을 포함한 모든 값 타입은, 값 타입을 소유한 엔티티에 생명주기를 의존함.
+        - 임베디드 타입과 테이블 매핑
+            - 임베디드 타입은 엔티티의 값일 뿐이다. 
+            - 임베디드 타입을 사용하기 전과 후에 매핑하는 테이블은 같다. 
+            - 객체와 테이블을 아주 세밀하게(find-grained) 매핑하는 것이 가능
+            - 잘 설계한 ORM 애플리케이션은 매핑한 테이블의 수보다 클래스의 수가 더 많음
+        ```java
+            @Entity
+            public class Member {
+                @Id
+                @GeneratedValue
+                @Column(name = "MEMBER_ID")
+                private Long id;
+            
+                @Column(name = "USERNAME")
+                private String username;
+            
+                //기간
+                @Embedded
+                private Period period;
+                //주소
+                @Embedded
+                private Address address;
+            }
+          
+        ```
+        ```java
+              @Embeddable
+              public class Address {
+              
+                  private String city;
+                  private String street;
+                  private String zipcode;
+              
+                  public Address() {
+                  }
+      
+                  public Address(String city, String street, String zipcode) {
+                      this.city = city;
+                      this.street = street;
+                      this.zipcode = zipcode;
+                  }
+      
+                  public String getCity() {
+                      return city;
+                  }
+              
+                  public void setCity(String city) {
+                      this.city = city;
+                  }
+              
+                  public String getStreet() {
+                      return street;
+                  }
+              
+                  public void setStreet(String street) {
+                      this.street = street;
+                  }
+              
+                  public String getZipcode() {
+                      return zipcode;
+                  }
+              
+                  public void setZipcode(String zipcode) {
+                      this.zipcode = zipcode;
+                  }
+              }
+
+              @Embeddable
+              public class Period {
+              
+                  private LocalDateTime startDate;
+                  private LocalDateTime endDate;
+              
+                  public Period() {
+                  }
+      
+                  public Period(LocalDateTime startDate, LocalDateTime endDate) {
+                      this.startDate = startDate;
+                      this.endDate = endDate;
+                  }
+
+                  public LocalDateTime getStartDate() {
+                      return startDate;
+                  }
+              
+                  public void setStartDate(LocalDateTime startDate) {
+                      this.startDate = startDate;
+                  }
+              
+                  public LocalDateTime getEndDate() {
+                      return endDate;
+                  }
+              
+                  public void setEndDate(LocalDateTime endDate) {
+                      this.endDate = endDate;
+                  }
+              }
+        ```
+        ```java
+              public class jpaMain {
+              
+                  public static void main(String[] args) {
+                      EntityManagerFactory emf = Persistence.createEntityManagerFactory("hello");
+                      EntityManager em = emf.createEntityManager();
+              
+                      EntityTransaction tx = em.getTransaction();
+                      tx.begin();
+              
+                      try {
+                              //임베디드타입 사용
+                              Member member = new Member();
+                              member.setUsername("hello");
+                              member.setAddress(new Address("city","street","11"));
+                              member.setPeriod(new Period());
+                  
+                              em.persist(member);
+                              tx.commit();
+                      } catch (Exception e ){
+                          e.printStackTrace();
+                          tx.rollback();
+                      } finally {
+                          em.close();
+                      }
+              
+                      emf.close();
+                  }
+              }
+        ```
+        - 한 엔티티에서 같은 값 타입을 사용하면?
+            - @AttributeOverrides, @AttributeOverride를 사용해서 컬럼 명 속성을 재정의
+        ```java
+              //주소2
+              @Embedded
+              @AttributeOverrides({
+                      @AttributeOverride(name="city", column = @Column(name = "WORK_CITY")),
+                      @AttributeOverride(name="street", column = @Column(name = "WORK_STREET")),
+                      @AttributeOverride(name="zipcode", column = @Column(name = "WORK_ZIPCODE"))
+          
+              })
+              private Address workAddress;
+        ```
+        - 임베디드 타입의 값이 null이면 매핑한 컬럼 값은 모두 null
+              
