@@ -1018,4 +1018,85 @@ CREATE TABLE MEMBER (
               private Address workAddress;
         ```
         - 임베디드 타입의 값이 null이면 매핑한 컬럼 값은 모두 null
-              
+    - 불변객체
+      - 값 타입은 객체를 조금이나마 단순화하려고 만든 개념이다. 따라서 값 타입은 단순하면서 안전하게 다룰 수 있어야 한다.
+      - 값 타입 공유참조 문제
+        - 임베디드 타입 같은 값 타입은 하나의 인스턴스로 여러 엔티티에서 공유하면 문제가 발생한다.
+        ```java
+        member1.setHomeAddress(new Address("suwon"));
+        Address address = member1.getHomeAddress();
+        
+        address.setCity("seoul"); // 공유참조 문제 발생
+        member.setHomeAddress(address);
+        ```
+        - 위의 코드는 값타입의 공유참조 문제를 일으키는 코드이다.
+        - 값 타입은 자바의 참조형 타입이다.
+        - 객체의 값을 수정하게 되면 같은 주소를 참조하는 다른 객체 모두에게 영향을 미친다. 이는 당연한 일이다.
+        > 이런 공유 참조로 인해 발생하는 버그는 정말 찾아내기 힘들다.
+        > 
+        > 뭔가를 수정했는데 전혀 예상치 못한 곳에서 문제가 발생하는것을 `사이드 이펙트`라고 한다.
+        > 
+        > 이런 부작용을 막으러면 값을 복사해서 사용하거나 `불변 객`체 로 만들어 사용해야 한다.
+      - 한번 생성하면 절대 변경할 수 없는 객체를 불변 객체 라고한다.
+      - 불변 객체의 값은 조회할 수 있지만 수정할 수 없다.
+      > 불변 객체도 결국 객체이다.
+      >
+      > 하지만 참조 값을 공유해도 인스턴스 값을 수정할 수 없으니 사이드이펙트가 발생하지 않는다.
+      ```java
+        @Embeddable
+        class Address {
+          private String city;
+          protected Addresss(){} // 기본 생성자 제공
+          
+          public Address(String city) {
+            this.city = city;
+          }
+          
+          // getter..
+        }
+      ```
+  - 값 타입의 비교
+    - 자바가 제공하는 객체의 비교는 2가지 이다.
+      - 동일성 비교: 인스턴스의 참조값을 비교, == 사용
+      - 동등성 비교: 인스턴스의 값을 비교 equals() 사용
+    > 자바에서 equals()를 재정의하면 hashCode()도 재정의하는 것이 안전하다.
+    >
+    > 그렇지 않으면 컬렉션이 제대로 동작하지 않는다.
+  - 값 타입 컬렉션
+    - 값 타입을 하나 이상 저장하고 싶다면 @ElementCollection 과 @ElementTable 애노테이션을 사용하면 된다.
+    ```java
+        @Entity
+        class Member {
+          ...
+            
+          @ElementCollection
+          @CollectionTable(name = "FAVORITE_FOODS",
+                          joinColumns = @JoinColumn(name = "MEMBER_ID"))
+          @Column(name = "FOOD_NAME")
+          private Set<String> favoriteFoods = new HashSet<String>();  
+        }
+        
+        @Embeddable
+        class Address {
+          
+          @Column
+          private String city;
+          private String street;
+          private String zipcode;
+        }
+    ```
+    > @CollectionTable 애노테이션의 사용방법은 @JoinTable과 사용방법이 유사하다. 생략하면 기본 전략을 사용한다.
+    >
+    > 기본전략 = {엔티티이름}_{컬렉션 속성 이름}
+    - 값 타입 컬렉션의 라이프사이클은 부모 엔티티를 따라간다.
+    - 영속성 전이 + 고아 객체 제거 기능을 가지고 있다.
+    - 제약 사항
+      - 엔티티는 식별자가 있지만, 값 타입은 식별자가 없다.
+      - 식별이 불가능하기 때문에 값 타입 컬렉션의 데이터가 변경되면, 모든 데이터를 지운뒤 INSERT 한다.
+      > 만약 컬렉션의 데이터가 많아 성능문제가 발생한다면 엔티티를 사용하는것을 고려해야한다.
+      >
+      > 엔티티 사용시 일대다 관계 설정 후 영속성 전이 + 고아 객체 제거 기능을 적용하면 값 타입 컬렉션 처럼 사용할 수 있다.
+- 값 타입 정리
+  - 값 타입은 식별자가 없다.
+  - 생명 주기를 엔티티에 의존한다.
+  - 공유 참조 문제가 발생할 수 있어 불변객체로 만들어 사용해야 한다.
